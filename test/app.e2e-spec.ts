@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { HcmClient } from '../src/modules/hcm-sync/hcm.client';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+describe('Timeoff API (e2e)', () => {
+  let app: INestApplication;
+  let hcmClient: HcmClient;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,13 +15,158 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    hcmClient = app.get(HcmClient);
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
+  it('creates and approves a request', async () => {
+    await request(app.getHttpServer())
+      .post('/sync/hcm/realtime/balance-updates')
+      .send({
+        externalEventId: 'seed-1',
+        employeeId: 'emp-1',
+        locationId: 'loc-1',
+        updateType: 'ABSOLUTE',
+        days: 10,
+      })
+      .expect(201);
+
+    const created = await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .send({ employeeId: 'emp-1', locationId: 'loc-1', days: 2 })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/timeoff-requests/${created.body.id}/approve`)
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.status).toBe('APPROVED');
+      });
+
+    await request(app.getHttpServer())
+      .get('/balances/emp-1/loc-1')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body.availableDays).toBe(8);
+      });
+  });
+
+  it('replays same Idempotency-Key with identical response and rejects payload mismatch', async () => {
+    const idemKey = 'idem-1';
+
+    const first = await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .set('Idempotency-Key', idemKey)
+      .send({ employeeId: 'emp-2', locationId: 'loc-2', days: 1 })
+      .expect(201);
+
+    const replay = await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .set('Idempotency-Key', idemKey)
+      .send({ employeeId: 'emp-2', locationId: 'loc-2', days: 1 })
+      .expect(201);
+
+    expect(replay.body).toEqual(first.body);
+
+    await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .set('Idempotency-Key', idemKey)
+      .send({ employeeId: 'emp-2', locationId: 'loc-2', days: 3 })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.code).toBe('IDEMPOTENCY_KEY_CONFLICT');
+      });
+  });
+
+  it('ingests batch balances and returns reconciliation report', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/sync/hcm/batch/balances')
+      .send({
+        jobId: 'job-1',
+        checksum: 'chk-1',
+        balances: [
+          { employeeId: 'e1', locationId: 'l1', days: 5 },
+          { employeeId: 'e1', locationId: 'l1', days: 7 },
+          { employeeId: '', locationId: 'l2', days: 3 },
+        ],
+      })
+      .expect(201);
+
+    expect(response.body).toEqual({
+      inserted: 1,
+      updated: 1,
+      unchanged: 0,
+      rejected: 1,
+      deduped: false,
+    });
+  });
+
+  it('dedupes repeated batch payload by jobId + checksum', async () => {
+    await request(app.getHttpServer())
+      .post('/sync/hcm/batch/balances')
+      .send({
+        jobId: 'job-2',
+        checksum: 'chk-2',
+        balances: [{ employeeId: 'e1', locationId: 'l1', days: 4 }],
+      })
+      .expect(201);
+
+    const duplicate = await request(app.getHttpServer())
+      .post('/sync/hcm/batch/balances')
+      .send({
+        jobId: 'job-2',
+        checksum: 'chk-2',
+        balances: [{ employeeId: 'e1', locationId: 'l1', days: 10 }],
+      })
+      .expect(201);
+
+    expect(duplicate.body.deduped).toBe(true);
+
+    await request(app.getHttpServer())
+      .get('/balances/e1/l1')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.availableDays).toBe(4);
+      });
+  });
+
+  it('reconciles local projection with HCM source-of-truth absolute value', async () => {
+    await request(app.getHttpServer())
+      .post('/sync/hcm/batch/balances')
+      .send({
+        jobId: 'job-3',
+        checksum: 'chk-3',
+        balances: [{ employeeId: 'e1', locationId: 'l1', days: 2 }],
+      })
+      .expect(201);
+
+    hcmClient.seedBalance('e1', 'l1', 9);
+
+    await request(app.getHttpServer())
+      .post('/sync/hcm/reconcile/e1/l1')
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.updated).toBe(true);
+        expect(res.body.hcmDays).toBe(9);
+        expect(res.body.localDays).toBe(2);
+      });
+
+    await request(app.getHttpServer())
+      .get('/balances/e1/l1')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.availableDays).toBe(9);
+      });
+  });
+
+  it('returns HCM_UNAVAILABLE when reconcile cannot reach HCM', async () => {
+    hcmClient.setUnavailable(true);
+
+    await request(app.getHttpServer())
+      .post('/sync/hcm/reconcile/e1/l1')
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.code).toBe('HCM_UNAVAILABLE');
+      });
   });
 
   afterEach(async () => {

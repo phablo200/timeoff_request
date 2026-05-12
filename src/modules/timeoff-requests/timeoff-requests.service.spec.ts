@@ -34,13 +34,23 @@ describe('TimeOffRequestsService', () => {
 
     expect(approved.status).toBe('APPROVED');
     expect(balance?.availableDays).toBe(7);
-    expect(requestsRepository.listSyncEventsByRequestId(request.id)).toHaveLength(1);
+    expect(
+      requestsRepository.listSyncEventsByRequestId(request.id),
+    ).toHaveLength(1);
   });
 
   it('should prevent overspend under concurrent approvals', async () => {
     balancesRepository.upsertAbsolute('emp-1', 'loc-1', 10);
-    const first = service.create({ employeeId: 'emp-1', locationId: 'loc-1', days: 7 });
-    const second = service.create({ employeeId: 'emp-1', locationId: 'loc-1', days: 7 });
+    const first = service.create({
+      employeeId: 'emp-1',
+      locationId: 'loc-1',
+      days: 7,
+    });
+    const second = service.create({
+      employeeId: 'emp-1',
+      locationId: 'loc-1',
+      days: 7,
+    });
 
     const results = await Promise.allSettled([
       Promise.resolve().then(() => service.approve(first.id)),
@@ -48,9 +58,12 @@ describe('TimeOffRequestsService', () => {
     ]);
 
     const approvedCount = results.filter(
-      (result) => result.status === 'fulfilled' && result.value.status === 'APPROVED',
+      (result) =>
+        result.status === 'fulfilled' && result.value.status === 'APPROVED',
     ).length;
-    const rejectedCount = results.filter((result) => result.status === 'rejected').length;
+    const rejectedCount = results.filter(
+      (result) => result.status === 'rejected',
+    ).length;
 
     expect(approvedCount).toBe(1);
     expect(rejectedCount).toBe(1);
@@ -59,9 +72,15 @@ describe('TimeOffRequestsService', () => {
 
   it('should return ILLEGAL_STATUS_TRANSITION when approving non-PENDING request', () => {
     balancesRepository.upsertAbsolute('emp-1', 'loc-1', 10);
-    const request = service.create({ employeeId: 'emp-1', locationId: 'loc-1', days: 1 });
+    const request = service.create({
+      employeeId: 'emp-1',
+      locationId: 'loc-1',
+      days: 1,
+    });
     service.approve(request.id);
 
-    expect(() => service.approve(request.id)).toThrow('cannot transition from APPROVED to APPROVED');
+    expect(() => service.approve(request.id)).toThrow(
+      'cannot transition from APPROVED to APPROVED',
+    );
   });
 });

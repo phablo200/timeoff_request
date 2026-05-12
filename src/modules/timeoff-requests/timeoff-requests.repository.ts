@@ -75,7 +75,12 @@ export class TimeOffRequestsRepository {
          SET status = ?, reason = ?, updated_at = ?
          WHERE id = ?`,
       )
-      .run(request.status, request.reason ?? null, request.updatedAt, request.id);
+      .run(
+        request.status,
+        request.reason ?? null,
+        request.updatedAt,
+        request.id,
+      );
 
     return request;
   }
@@ -169,7 +174,12 @@ export class TimeOffRequestsRepository {
     }));
   }
 
-  markSyncEventRetry(id: string, attemptCount: number, nextAttemptAt: string, error: string): void {
+  markSyncEventRetry(
+    id: string,
+    attemptCount: number,
+    nextAttemptAt: string,
+    error: string,
+  ): void {
     this.databaseService
       .connection()
       .prepare(

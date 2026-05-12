@@ -29,19 +29,33 @@ export class RealtimeSyncService {
     if (!dedupeResult.inserted) {
       return {
         deduped: true,
-        balance: this.balancesRepository.get(event.employeeId, event.locationId),
+        balance: this.balancesRepository.get(
+          event.employeeId,
+          event.locationId,
+        ),
       };
     }
 
     const balance =
       event.updateType === 'ABSOLUTE'
-        ? this.balancesRepository.upsertAbsolute(event.employeeId, event.locationId, event.days)
-        : this.balancesRepository.applyDelta(event.employeeId, event.locationId, event.days);
+        ? this.balancesRepository.upsertAbsolute(
+            event.employeeId,
+            event.locationId,
+            event.days,
+          )
+        : this.balancesRepository.applyDelta(
+            event.employeeId,
+            event.locationId,
+            event.days,
+          );
 
     this.balancesRepository.insertLedgerEntry({
       id: randomUUID(),
       balanceKey: `${event.employeeId}::${event.locationId}`,
-      type: event.updateType === 'ABSOLUTE' ? 'HCM_REALTIME_ABSOLUTE' : 'HCM_REALTIME_DELTA',
+      type:
+        event.updateType === 'ABSOLUTE'
+          ? 'HCM_REALTIME_ABSOLUTE'
+          : 'HCM_REALTIME_DELTA',
       days: event.days,
       source: 'HCM_REALTIME',
       createdAt: new Date().toISOString(),

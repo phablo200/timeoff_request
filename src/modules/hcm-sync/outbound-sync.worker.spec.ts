@@ -1,6 +1,7 @@
 import { ConfigService } from '../../config.service';
 import { DatabaseService } from '../../persistence/database.service';
 import { BalancesRepository } from '../balances/balances.repository';
+import { MetricsService } from '../observability/metrics.service';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
 import { TimeOffRequestsService } from '../timeoff-requests/timeoff-requests.service';
 import { HcmClient } from './hcm.client';
@@ -26,47 +27,64 @@ describe('OutboundSyncWorker', () => {
       databaseService,
     );
     hcmClient = new HcmClient();
-    worker = new OutboundSyncWorker(requestsRepository, hcmClient, config);
+    worker = new OutboundSyncWorker(
+      requestsRepository,
+      hcmClient,
+      config,
+      new MetricsService(),
+    );
   });
 
-  it('moves APPROVED request to SYNCED on success', () => {
+  it('moves APPROVED request to SYNCED on success', async () => {
     balancesRepository.upsertAbsolute('e1', 'l1', 10);
-    hcmClient.seedBalance('e1', 'l1', 10);
+    await hcmClient.seedBalance('e1', 'l1', 10);
 
-    const req = requestsService.create({ employeeId: 'e1', locationId: 'l1', days: 2 });
+    const req = requestsService.create({
+      employeeId: 'e1',
+      locationId: 'l1',
+      days: 2,
+    });
     requestsService.approve(req.id);
 
-    const result = worker.processDueEvents();
+    const result = await worker.processDueEvents();
     const updated = requestsService.findById(req.id);
 
     expect(result.processed).toBe(1);
     expect(updated.status).toBe('SYNCED');
   });
 
-  it('retries transient failures then keeps request not synced', () => {
+  it('retries transient failures then keeps request not synced', async () => {
     balancesRepository.upsertAbsolute('e1', 'l1', 10);
-    hcmClient.seedBalance('e1', 'l1', 10);
-    hcmClient.setFailureMode('TRANSIENT');
+    await hcmClient.seedBalance('e1', 'l1', 10);
+    await hcmClient.setFailureMode('TRANSIENT');
 
-    const req = requestsService.create({ employeeId: 'e1', locationId: 'l1', days: 2 });
+    const req = requestsService.create({
+      employeeId: 'e1',
+      locationId: 'l1',
+      days: 2,
+    });
     requestsService.approve(req.id);
 
-    const result = worker.processDueEvents();
+    const result = await worker.processDueEvents();
     const updated = requestsService.findById(req.id);
 
     expect(result.processed).toBe(0);
     expect(updated.status).toBe('APPROVED');
   });
 
-  it('reverses request on functional failure', () => {
+  it('reverses request on functional failure', async () => {
     balancesRepository.upsertAbsolute('e1', 'l1', 10);
-    hcmClient.seedBalance('e1', 'l1', 10);
-    hcmClient.setFailureMode('FUNCTIONAL');
+    await hcmClient.seedBalance('e1', 'l1', 10);
+    await hcmClient.setFailureMode('FUNCTIONAL');
 
-    const req = requestsService.create({ employeeId: 'e1', locationId: 'l1', days: 2 });
+    const req = requestsService.create({
+      employeeId: 'e1',
+      locationId: 'l1',
+      days: 2,
+    });
     requestsService.approve(req.id);
 
-    worker.processDueEvents();
+    await worker.processDueEvents();
 
     const updated = requestsService.findById(req.id);
     expect(updated.status).toBe('REVERSED');

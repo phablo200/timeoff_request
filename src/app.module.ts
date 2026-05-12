@@ -12,6 +12,8 @@ import { HcmClient } from './modules/hcm-sync/hcm.client';
 import { SyncController } from './modules/hcm-sync/sync.controller';
 import { SyncAdminController } from './modules/hcm-sync/sync-admin.controller';
 import { OutboundSyncWorker } from './modules/hcm-sync/outbound-sync.worker';
+import { MetricsController } from './modules/observability/metrics.controller';
+import { MetricsService } from './modules/observability/metrics.service';
 import { IdempotencyInterceptor } from './modules/idempotency/idempotency.interceptor';
 import { IdempotencyService } from './modules/idempotency/idempotency.service';
 import { ConfigService } from './config.service';
@@ -30,6 +32,7 @@ import { DomainErrorFilter } from './domain-error.filter';
     WebhookController,
     SyncController,
     SyncAdminController,
+    MetricsController,
   ],
   providers: [
     AppService,
@@ -43,6 +46,7 @@ import { DomainErrorFilter } from './domain-error.filter';
     BatchSyncService,
     OutboundSyncWorker,
     HcmClient,
+    MetricsService,
     IdempotencyService,
     {
       provide: APP_FILTER,

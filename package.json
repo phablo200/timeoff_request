@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "hcm:mock:start": "ts-node test/mocks/hcm-mock.server.ts",
+    "hcm:mock:reset": "node test/mocks/reset-hcm-mock.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

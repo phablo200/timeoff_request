@@ -6,7 +6,10 @@ export function assertPositiveDays(days: number): void {
   }
 }
 
-export function assertHasBalance(availableDays: number, requestedDays: number): void {
+export function assertHasBalance(
+  availableDays: number,
+  requestedDays: number,
+): void {
   if (availableDays - requestedDays < 0) {
     throw new DomainError('INSUFFICIENT_BALANCE', 'insufficient balance');
   }

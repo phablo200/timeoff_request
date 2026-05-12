@@ -23,7 +23,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
         headers: Record<string, string>;
       }
     >();
-    const response = context.switchToHttp().getResponse<{ statusCode: number }>();
+    const response = context
+      .switchToHttp()
+      .getResponse<{ statusCode: number }>();
 
     if (request.method !== 'POST') {
       return next.handle();
@@ -34,7 +36,10 @@ export class IdempotencyInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const fingerprint = canonicalFingerprint({ url: request.url, body: request.body });
+    const fingerprint = canonicalFingerprint({
+      url: request.url,
+      body: request.body,
+    });
     const existing = this.idempotencyService.get(idempotencyKey);
 
     if (existing) {

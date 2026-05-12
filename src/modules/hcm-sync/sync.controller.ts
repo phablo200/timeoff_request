@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { BatchSyncService } from './batch-sync.service';
 import { DatabaseService } from '../../persistence/database.service';
+import { BatchSyncService } from './batch-sync.service';
 
 interface BatchPayloadDto {
   jobId: string;

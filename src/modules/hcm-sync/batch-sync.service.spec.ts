@@ -1,5 +1,6 @@
 import { DatabaseService } from '../../persistence/database.service';
 import { BalancesRepository } from '../balances/balances.repository';
+import { MetricsService } from '../observability/metrics.service';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
 import { BatchSyncService } from './batch-sync.service';
 import { HcmClient } from './hcm.client';
@@ -19,6 +20,7 @@ describe('BatchSyncService', () => {
       balancesRepository,
       hcmClient,
       new TimeOffRequestsRepository(db),
+      new MetricsService(),
     );
   });
 
@@ -63,19 +65,21 @@ describe('BatchSyncService', () => {
     expect(balancesRepository.get('e1', 'l1')?.availableDays).toBe(5);
   });
 
-  it('reconciles one balance using HCM absolute value', () => {
+  it('reconciles one balance using HCM absolute value', async () => {
     balancesRepository.upsertAbsolute('e1', 'l1', 3);
-    hcmClient.seedBalance('e1', 'l1', 10);
+    await hcmClient.seedBalance('e1', 'l1', 10);
 
-    const result = service.reconcileOne('e1', 'l1');
+    const result = await service.reconcileOne('e1', 'l1');
 
     expect(result.updated).toBe(true);
     expect(result.hcmDays).toBe(10);
     expect(balancesRepository.get('e1', 'l1')?.availableDays).toBe(10);
   });
 
-  it('throws HCM_UNAVAILABLE when hcm is down', () => {
-    hcmClient.setUnavailable(true);
-    expect(() => service.reconcileOne('e1', 'l1')).toThrow('hcm unavailable');
+  it('throws HCM_UNAVAILABLE when hcm is down', async () => {
+    await hcmClient.setUnavailable(true);
+    await expect(service.reconcileOne('e1', 'l1')).rejects.toThrow(
+      'hcm unavailable',
+    );
   });
 });

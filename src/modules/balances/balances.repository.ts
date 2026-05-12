@@ -36,24 +36,41 @@ export class BalancesRepository {
     };
   }
 
-  upsertAbsolute(employeeId: string, locationId: string, availableDays: number): Balance {
+  upsertAbsolute(
+    employeeId: string,
+    locationId: string,
+    availableDays: number,
+  ): Balance {
     const now = new Date().toISOString();
-    this.databaseService.connection().prepare(
-      `INSERT INTO balances (employee_id, location_id, available_days, version, updated_at, last_synced_at)
+    this.databaseService
+      .connection()
+      .prepare(
+        `INSERT INTO balances (employee_id, location_id, available_days, version, updated_at, last_synced_at)
        VALUES (?, ?, ?, 1, ?, ?)
        ON CONFLICT(employee_id, location_id) DO UPDATE SET
          available_days = excluded.available_days,
          version = balances.version + 1,
          updated_at = excluded.updated_at,
          last_synced_at = excluded.last_synced_at`,
-    ).run(employeeId, locationId, availableDays, now, now);
+      )
+      .run(employeeId, locationId, availableDays, now, now);
 
     return this.get(employeeId, locationId)!;
   }
 
-  applyDelta(employeeId: string, locationId: string, deltaDays: number): Balance {
-    const existing = this.get(employeeId, locationId) ?? this.upsertAbsolute(employeeId, locationId, 0);
-    return this.upsertAbsolute(employeeId, locationId, existing.availableDays + deltaDays);
+  applyDelta(
+    employeeId: string,
+    locationId: string,
+    deltaDays: number,
+  ): Balance {
+    const existing =
+      this.get(employeeId, locationId) ??
+      this.upsertAbsolute(employeeId, locationId, 0);
+    return this.upsertAbsolute(
+      employeeId,
+      locationId,
+      existing.availableDays + deltaDays,
+    );
   }
 
   consumeWithVersion(
@@ -64,11 +81,14 @@ export class BalancesRepository {
   ): Balance | undefined {
     const now = new Date().toISOString();
 
-    const result = this.databaseService.connection().prepare(
-      `UPDATE balances
+    const result = this.databaseService
+      .connection()
+      .prepare(
+        `UPDATE balances
        SET available_days = available_days - ?, version = version + 1, updated_at = ?
        WHERE employee_id = ? AND location_id = ? AND version = ? AND available_days - ? >= 0`,
-    ).run(days, now, employeeId, locationId, expectedVersion, days);
+      )
+      .run(days, now, employeeId, locationId, expectedVersion, days);
 
     if (result.changes === 0) {
       return undefined;

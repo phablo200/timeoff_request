@@ -8,7 +8,9 @@ import { ConfigService } from '../config.service';
 export class DatabaseService {
   private readonly db: Database.Database;
 
-  constructor(private readonly configService: ConfigService = new ConfigService()) {
+  constructor(
+    private readonly configService: ConfigService = new ConfigService(),
+  ) {
     this.configService.validate();
     this.db = new Database(this.configService.dbPath);
     this.db.pragma('foreign_keys = ON');
@@ -56,7 +58,13 @@ export class DatabaseService {
     }
 
     const compiledPath = join(__dirname, 'migrations', migrationName);
-    const sourcePath = join(process.cwd(), 'src', 'persistence', 'migrations', migrationName);
+    const sourcePath = join(
+      process.cwd(),
+      'src',
+      'persistence',
+      'migrations',
+      migrationName,
+    );
     const migrationPath = existsSync(compiledPath) ? compiledPath : sourcePath;
     const migrationSql = readFileSync(migrationPath, 'utf8');
     this.db.exec(migrationSql);

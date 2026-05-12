@@ -19,6 +19,10 @@ describe('Timeoff API (e2e)', () => {
   });
 
   it('creates and approves a request', async () => {
+    type CreateRequestResponse = { id: string };
+    type ApproveResponse = { status: string };
+    type BalanceResponse = { availableDays: number };
+
     await request(app.getHttpServer())
       .post('/sync/hcm/realtime/balance-updates')
       .send({
@@ -35,19 +39,19 @@ describe('Timeoff API (e2e)', () => {
       .send({ employeeId: 'emp-1', locationId: 'loc-1', days: 2 })
       .expect(201);
 
-    await request(app.getHttpServer())
-      .post(`/timeoff-requests/${created.body.id}/approve`)
-      .expect(201)
-      .expect((res) => {
-        expect(res.body.status).toBe('APPROVED');
-      });
+    const createdBody = created.body as CreateRequestResponse;
 
-    await request(app.getHttpServer())
+    const approved = await request(app.getHttpServer())
+      .post(`/timeoff-requests/${createdBody.id}/approve`)
+      .expect(201);
+    const approvedBody = approved.body as ApproveResponse;
+    expect(approvedBody.status).toBe('APPROVED');
+
+    const balance = await request(app.getHttpServer())
       .get('/balances/emp-1/loc-1')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body.availableDays).toBe(8);
-      });
+      .expect(200);
+    const balanceBody = balance.body as BalanceResponse;
+    expect(balanceBody.availableDays).toBe(8);
   });
 
   it('replays same Idempotency-Key with identical response and rejects payload mismatch', async () => {
@@ -67,14 +71,15 @@ describe('Timeoff API (e2e)', () => {
 
     expect(replay.body).toEqual(first.body);
 
-    await request(app.getHttpServer())
+    const conflict = await request(app.getHttpServer())
       .post('/timeoff-requests')
       .set('Idempotency-Key', idemKey)
       .send({ employeeId: 'emp-2', locationId: 'loc-2', days: 3 })
-      .expect(400)
-      .expect((res) => {
-        expect(res.body.code).toBe('IDEMPOTENCY_KEY_CONFLICT');
-      });
+      .expect(400);
+
+    expect((conflict.body as { code: string }).code).toBe(
+      'IDEMPOTENCY_KEY_CONFLICT',
+    );
   });
 
   it('ingests batch balances and returns reconciliation report', async () => {
@@ -119,14 +124,12 @@ describe('Timeoff API (e2e)', () => {
       })
       .expect(201);
 
-    expect(duplicate.body.deduped).toBe(true);
+    expect((duplicate.body as { deduped: boolean }).deduped).toBe(true);
 
-    await request(app.getHttpServer())
+    const balance = await request(app.getHttpServer())
       .get('/balances/e1/l1')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body.availableDays).toBe(4);
-      });
+      .expect(200);
+    expect((balance.body as { availableDays: number }).availableDays).toBe(4);
   });
 
   it('reconciles local projection with HCM source-of-truth absolute value', async () => {
@@ -141,32 +144,31 @@ describe('Timeoff API (e2e)', () => {
 
     hcmClient.seedBalance('e1', 'l1', 9);
 
-    await request(app.getHttpServer())
+    const reconcile = await request(app.getHttpServer())
       .post('/sync/hcm/reconcile/e1/l1')
-      .expect(201)
-      .expect((res) => {
-        expect(res.body.updated).toBe(true);
-        expect(res.body.hcmDays).toBe(9);
-        expect(res.body.localDays).toBe(2);
-      });
+      .expect(201);
+    const reconcileBody = reconcile.body as {
+      updated: boolean;
+      hcmDays: number;
+      localDays: number;
+    };
+    expect(reconcileBody.updated).toBe(true);
+    expect(reconcileBody.hcmDays).toBe(9);
+    expect(reconcileBody.localDays).toBe(2);
 
-    await request(app.getHttpServer())
+    const balance = await request(app.getHttpServer())
       .get('/balances/e1/l1')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body.availableDays).toBe(9);
-      });
+      .expect(200);
+    expect((balance.body as { availableDays: number }).availableDays).toBe(9);
   });
 
   it('returns HCM_UNAVAILABLE when reconcile cannot reach HCM', async () => {
     hcmClient.setUnavailable(true);
 
-    await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post('/sync/hcm/reconcile/e1/l1')
-      .expect(400)
-      .expect((res) => {
-        expect(res.body.code).toBe('HCM_UNAVAILABLE');
-      });
+      .expect(400);
+    expect((response.body as { code: string }).code).toBe('HCM_UNAVAILABLE');
   });
 
   afterEach(async () => {

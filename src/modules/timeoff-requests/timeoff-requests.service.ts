@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../persistence/database.service';
 import { BalancesRepository } from '../balances/balances.repository';
-import { assertHasBalance, assertPositiveDays } from '../shared/domain/balance.policy';
+import {
+  assertHasBalance,
+  assertPositiveDays,
+} from '../shared/domain/balance.policy';
 import { DomainError } from '../shared/domain/errors';
 import { assertTransition } from '../shared/domain/request-status.policy';
 import { SyncEvent, TimeOffRequest } from '../shared/domain/types';
@@ -26,7 +29,10 @@ export class TimeOffRequestsService {
   create(input: CreateRequestInput): TimeOffRequest {
     assertPositiveDays(input.days);
     if (!input.employeeId || !input.locationId) {
-      throw new DomainError('INVALID_DIMENSIONS', 'employeeId and locationId are required');
+      throw new DomainError(
+        'INVALID_DIMENSIONS',
+        'employeeId and locationId are required',
+      );
     }
 
     const now = new Date().toISOString();
@@ -60,7 +66,11 @@ export class TimeOffRequestsService {
 
         const currentBalance =
           this.balancesRepository.get(request.employeeId, request.locationId) ??
-          this.balancesRepository.upsertAbsolute(request.employeeId, request.locationId, 0);
+          this.balancesRepository.upsertAbsolute(
+            request.employeeId,
+            request.locationId,
+            0,
+          );
 
         assertHasBalance(currentBalance.availableDays, request.days);
 
@@ -105,7 +115,10 @@ export class TimeOffRequestsService {
           createdAt: new Date().toISOString(),
         };
 
-        this.requestsRepository.createSyncEvent({ ...syncEvent, requestId: updatedRequest.id });
+        this.requestsRepository.createSyncEvent({
+          ...syncEvent,
+          requestId: updatedRequest.id,
+        });
         return updatedRequest;
       });
 
@@ -114,7 +127,10 @@ export class TimeOffRequestsService {
       }
     }
 
-    throw new DomainError('CONFLICT', 'failed to approve after optimistic retries');
+    throw new DomainError(
+      'CONFLICT',
+      'failed to approve after optimistic retries',
+    );
   }
 
   reject(id: string): TimeOffRequest {

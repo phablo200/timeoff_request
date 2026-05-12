@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '../../config.service';
+import { MetricsService } from '../observability/metrics.service';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
 import { HcmClient } from './hcm.client';
 
@@ -11,9 +12,10 @@ export class OutboundSyncWorker {
     private readonly requestsRepository: TimeOffRequestsRepository,
     private readonly hcmClient: HcmClient,
     private readonly configService: ConfigService,
+    private readonly metricsService: MetricsService,
   ) {}
 
-  processDueEvents(limit = 10): { processed: number } {
+  async processDueEvents(limit = 10): Promise<{ processed: number }> {
     const due = this.requestsRepository.listDueOutboundSyncEvents(limit);
     let processed = 0;
 
@@ -26,10 +28,15 @@ export class OutboundSyncWorker {
           days: number;
         };
 
-        this.hcmClient.submitApprovedUsage(payload);
+        await this.hcmClient.submitApprovedUsage(payload);
         this.requestsRepository.markRequestSynced(event.requestId!);
         this.requestsRepository.markSyncEventSynced(event.id);
         processed += 1;
+
+        this.metricsService.observe(
+          'hcm_sync_latency_ms',
+          Date.now() - startedAt,
+        );
 
         this.logger.log(
           JSON.stringify({
@@ -40,10 +47,15 @@ export class OutboundSyncWorker {
           }),
         );
       } catch (error) {
+        this.metricsService.inc('hcm_sync_failures_total');
+
         const err = error as Error & { kind?: string };
         const transient = err.kind === 'TRANSIENT';
 
-        if (transient && event.attemptCount + 1 < this.configService.syncMaxAttempts) {
+        if (
+          transient &&
+          event.attemptCount + 1 < this.configService.syncMaxAttempts
+        ) {
           this.requestsRepository.markSyncEventRetry(
             event.id,
             event.attemptCount + 1,
@@ -52,7 +64,9 @@ export class OutboundSyncWorker {
           );
         } else {
           this.requestsRepository.markSyncEventFailed(event.id, err.message);
-          this.requestsRepository.markRequestFailedAndReversed(event.requestId!);
+          this.requestsRepository.markRequestFailedAndReversed(
+            event.requestId!,
+          );
         }
       }
     }

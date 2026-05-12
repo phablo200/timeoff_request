@@ -17,6 +17,11 @@ export class TimeOffRequestsController {
     return this.requestsService.create(body);
   }
 
+  @Get()
+  listAll() {
+    return this.requestsService.listAll();
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.requestsService.findById(id);

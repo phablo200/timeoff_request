@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import Database from 'better-sqlite3';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { ConfigService } from '../config.service';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class DatabaseService {

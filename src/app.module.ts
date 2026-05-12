@@ -14,7 +14,7 @@ import { MetricsController } from './modules/observability/metrics.controller';
 import { MetricsService } from './modules/observability/metrics.service';
 import { IdempotencyInterceptor } from './modules/idempotency/idempotency.interceptor';
 import { IdempotencyService } from './modules/idempotency/idempotency.service';
-import { ConfigService } from './config.service';
+import { ConfigService } from './config/config.service';
 import { DatabaseService } from './db/database.service';
 import { TimeOffRequestsController } from './modules/timeoff-requests/timeoff-requests.controller';
 import { TimeOffRequestsRepository } from './modules/timeoff-requests/timeoff-requests.repository';

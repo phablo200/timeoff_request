@@ -67,6 +67,37 @@ export class TimeOffRequestsRepository {
     };
   }
 
+  listAll(): TimeOffRequest[] {
+    const rows = this.databaseService
+      .connection()
+      .prepare(
+        `SELECT id, employee_id, location_id, days, reason, status, created_at, updated_at
+         FROM time_off_requests
+         ORDER BY created_at DESC`,
+      )
+      .all() as Array<{
+      id: string;
+      employee_id: string;
+      location_id: string;
+      days: number;
+      reason: string | null;
+      status: TimeOffRequest['status'];
+      created_at: string;
+      updated_at: string;
+    }>;
+
+    return rows.map((row) => ({
+      id: row.id,
+      employeeId: row.employee_id,
+      locationId: row.location_id,
+      days: row.days,
+      reason: row.reason ?? undefined,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+  }
+
   save(request: TimeOffRequest): TimeOffRequest {
     this.databaseService
       .connection()

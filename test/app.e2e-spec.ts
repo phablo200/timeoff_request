@@ -82,6 +82,44 @@ describe('Timeoff API (e2e)', () => {
     );
   });
 
+  it('lists all time-off requests', async () => {
+    await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .send({ employeeId: 'emp-list-1', locationId: 'loc-list', days: 1 })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .send({ employeeId: 'emp-list-2', locationId: 'loc-list', days: 2 })
+      .expect(201);
+
+    const response = await request(app.getHttpServer())
+      .get('/timeoff-requests')
+      .expect(200);
+
+    const items = response.body as Array<{
+      employeeId: string;
+      locationId: string;
+      days: number;
+    }>;
+
+    expect(items.length).toBeGreaterThanOrEqual(2);
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          employeeId: 'emp-list-1',
+          locationId: 'loc-list',
+          days: 1,
+        }),
+        expect.objectContaining({
+          employeeId: 'emp-list-2',
+          locationId: 'loc-list',
+          days: 2,
+        }),
+      ]),
+    );
+  });
+
   it('ingests batch balances and returns reconciliation report', async () => {
     const response = await request(app.getHttpServer())
       .post('/sync/hcm/batch/balances')

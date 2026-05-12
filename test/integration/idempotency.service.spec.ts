@@ -1,11 +1,10 @@
-import { ConfigService } from '../../src/config.service';
+import { ConfigService } from '../../src/config/config.service';
 import { DatabaseService } from '../../src/db/database.service';
 import { IdempotencyService } from '../../src/modules/idempotency/idempotency.service';
 
 describe('IdempotencyService', () => {
   it('cleans up expired records', () => {
     process.env.DB_PATH = ':memory:';
-    process.env.IDEMPOTENCY_TTL_SEC = '1';
     const config = new ConfigService();
     const db = new DatabaseService(config);
     const service = new IdempotencyService(db, config);

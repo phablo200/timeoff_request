@@ -1,4 +1,4 @@
-import { ConfigService } from '../../../src/config.service';
+import { ConfigService } from '../../../src/config/config.service';
 import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
 import { MetricsService } from '../../../src/modules/observability/metrics.service';

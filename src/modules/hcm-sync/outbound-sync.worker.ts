@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '../../config.service';
+import { ConfigService } from '../../config/config.service';
 import { MetricsService } from '../observability/metrics.service';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
 import { HcmClient } from './hcm.client';

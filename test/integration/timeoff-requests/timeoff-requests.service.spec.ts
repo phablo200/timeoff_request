@@ -83,4 +83,24 @@ describe('TimeOffRequestsService', () => {
       'cannot transition from APPROVED to APPROVED',
     );
   });
+
+  it('should list all requests', () => {
+    const first = service.create({
+      employeeId: 'emp-1',
+      locationId: 'loc-1',
+      days: 1,
+    });
+    const second = service.create({
+      employeeId: 'emp-2',
+      locationId: 'loc-2',
+      days: 2,
+    });
+
+    const items = service.listAll();
+
+    expect(items).toHaveLength(2);
+    expect(items.map((item) => item.id)).toEqual(
+      expect.arrayContaining([first.id, second.id]),
+    );
+  });
 });

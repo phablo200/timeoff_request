@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '../../config.service';
+import { ConfigService } from '../../config/config.service';
 import { DatabaseService } from '../../db/database.service';
 import { IdempotencyRecord } from '../../shared/domain/types';
 

@@ -48,10 +48,12 @@ NestJS + SQLite service for managing time-off request lifecycle while keeping ba
 Environment variables:
 
 - `DB_PATH` (default: `:memory:`)
-- `SYNC_WORKER_INTERVAL_MS` (default: `5000`)
-- `SYNC_MAX_ATTEMPTS` (default: `5`)
-- `IDEMPOTENCY_TTL_SEC` (default: `86400`)
 - `HCM_BASE_URL` (optional; defaults to internal in-memory HCM client behavior)
+
+Internal defaults (code constants in `src/config/defaults.ts`):
+- `SYNC_WORKER_INTERVAL_MS = 5000`
+- `SYNC_MAX_ATTEMPTS = 5`
+- `IDEMPOTENCY_TTL_SEC = 86400`
 
 Example local run with persistent DB:
 

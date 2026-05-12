@@ -58,6 +58,10 @@ export class TimeOffRequestsService {
     return request;
   }
 
+  listAll(): TimeOffRequest[] {
+    return this.requestsRepository.listAll();
+  }
+
   approve(id: string): TimeOffRequest {
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const approved = this.databaseService.withTransaction(() => {

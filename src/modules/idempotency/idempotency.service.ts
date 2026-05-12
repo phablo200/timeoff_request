@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '../../config/config.service';
 import { DatabaseService } from '../../db/database.service';
-import { IdempotencyRecord } from '../../shared/domain/types';
+import { IdempotencyRecord } from '../../shared/types/idempotence.types';
 
 @Injectable()
 export class IdempotencyService {

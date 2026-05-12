@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../db/database.service';
-import { Balance, BalanceLedgerEntry } from '../../shared/domain/types';
+import { Balance, BalanceLedgerEntry } from '../../shared/types/balance.types';
 
 @Injectable()
 export class BalancesRepository {

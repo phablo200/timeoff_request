@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../db/database.service';
-import { SyncEvent, TimeOffRequest } from '../../shared/domain/types';
+import { TimeOffRequest } from '../../shared/types/request.types';
+import { SyncEvent } from '../../shared/types/sync.types';
 
 interface DueSyncEvent extends SyncEvent {
   requestId?: string;

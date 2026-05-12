@@ -1,5 +1,5 @@
 import { DomainError } from './errors';
-import { RequestStatus } from './types';
+import { RequestStatus } from '../types/request.types';
 
 const allowedTransitions: Record<RequestStatus, RequestStatus[]> = {
   PENDING: ['APPROVED', 'REJECTED', 'CANCELLED'],

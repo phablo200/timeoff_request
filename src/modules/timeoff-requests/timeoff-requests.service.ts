@@ -8,7 +8,8 @@ import {
 } from '../../shared/domain/balance.policy';
 import { DomainError } from '../../shared/domain/errors';
 import { assertTransition } from '../../shared/domain/request-status.policy';
-import { SyncEvent, TimeOffRequest } from '../../shared/domain/types';
+import { TimeOffRequest } from '../../shared/types/request.types';
+import { SyncEvent } from '../../shared/types/sync.types';
 import { TimeOffRequestsRepository } from './timeoff-requests.repository';
 
 interface CreateRequestInput {

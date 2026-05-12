@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
 import {
   DEFAULT_IDEMPOTENCY_TTL_SEC,

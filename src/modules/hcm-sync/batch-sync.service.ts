@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DatabaseService } from '../../persistence/database.service';
+import { DatabaseService } from '../../db/database.service';
 import { BalancesRepository } from '../balances/balances.repository';
 import { MetricsService } from '../observability/metrics.service';
-import { DomainError } from '../shared/domain/errors';
+import { DomainError } from '../../shared/domain/errors';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
 import { HcmClient } from './hcm.client';
 

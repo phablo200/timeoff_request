@@ -1,5 +1,5 @@
 import { ConfigService } from '../../src/config.service';
-import { DatabaseService } from '../../src/persistence/database.service';
+import { DatabaseService } from '../../src/db/database.service';
 import { IdempotencyService } from '../../src/modules/idempotency/idempotency.service';
 
 describe('IdempotencyService', () => {

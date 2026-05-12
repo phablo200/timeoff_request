@@ -1,4 +1,4 @@
-import { DatabaseService } from '../../../src/persistence/database.service';
+import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
 import { MetricsService } from '../../../src/modules/observability/metrics.service';
 import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';

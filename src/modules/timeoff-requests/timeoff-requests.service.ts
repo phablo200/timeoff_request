@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { DatabaseService } from '../../persistence/database.service';
+import { DatabaseService } from '../../db/database.service';
 import { BalancesRepository } from '../balances/balances.repository';
 import {
   assertHasBalance,
   assertPositiveDays,
-} from '../shared/domain/balance.policy';
-import { DomainError } from '../shared/domain/errors';
-import { assertTransition } from '../shared/domain/request-status.policy';
-import { SyncEvent, TimeOffRequest } from '../shared/domain/types';
+} from '../../shared/domain/balance.policy';
+import { DomainError } from '../../shared/domain/errors';
+import { assertTransition } from '../../shared/domain/request-status.policy';
+import { SyncEvent, TimeOffRequest } from '../../shared/domain/types';
 import { TimeOffRequestsRepository } from './timeoff-requests.repository';
 
 interface CreateRequestInput {

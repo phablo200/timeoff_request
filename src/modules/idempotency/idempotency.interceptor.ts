@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { DomainError } from '../shared/domain/errors';
+import { DomainError } from '../../shared/domain/errors';
 import { canonicalFingerprint } from './fingerprint';
 import { IdempotencyService } from './idempotency.service';
 

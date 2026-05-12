@@ -1,4 +1,4 @@
-import { DatabaseService } from '../../src/persistence/database.service';
+import { DatabaseService } from '../../src/db/database.service';
 
 export function createTestDatabaseService(): DatabaseService {
   process.env.DB_PATH = ':memory:';

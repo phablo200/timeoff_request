@@ -1,4 +1,4 @@
-import { DatabaseService } from '../../../src/persistence/database.service';
+import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
 import { RealtimeSyncService } from '../../../src/modules/hcm-sync/realtime-sync.service';
 

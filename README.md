@@ -17,7 +17,7 @@ NestJS + SQLite service for managing time-off request lifecycle while keeping ba
 ## Architecture Notes
 
 - Persistence: SQLite via `better-sqlite3`
-- Schema/migration bootstrap: `src/persistence/migrations/001_init.sql`
+- Schema/migration bootstrap: `src/db/migrations/001_init.sql`
 - Transaction boundary for approval flow: request status + balance update + ledger + sync event
 - HCM behavior can be tested with the persistent mock server in `test/mocks/hcm-mock.server.ts`
 

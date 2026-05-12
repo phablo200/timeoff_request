@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { BalancesController } from './modules/balances/balances.controller';
 import { BalancesRepository } from './modules/balances/balances.repository';
 import { BalancesService } from './modules/balances/balances.service';
@@ -17,7 +15,7 @@ import { MetricsService } from './modules/observability/metrics.service';
 import { IdempotencyInterceptor } from './modules/idempotency/idempotency.interceptor';
 import { IdempotencyService } from './modules/idempotency/idempotency.service';
 import { ConfigService } from './config.service';
-import { DatabaseService } from './persistence/database.service';
+import { DatabaseService } from './db/database.service';
 import { TimeOffRequestsController } from './modules/timeoff-requests/timeoff-requests.controller';
 import { TimeOffRequestsRepository } from './modules/timeoff-requests/timeoff-requests.repository';
 import { TimeOffRequestsService } from './modules/timeoff-requests/timeoff-requests.service';
@@ -26,7 +24,6 @@ import { DomainErrorFilter } from './domain-error.filter';
 @Module({
   imports: [],
   controllers: [
-    AppController,
     BalancesController,
     TimeOffRequestsController,
     WebhookController,
@@ -35,7 +32,6 @@ import { DomainErrorFilter } from './domain-error.filter';
     MetricsController,
   ],
   providers: [
-    AppService,
     ConfigService,
     DatabaseService,
     BalancesRepository,

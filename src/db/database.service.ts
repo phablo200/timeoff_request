@@ -61,7 +61,7 @@ export class DatabaseService {
     const sourcePath = join(
       process.cwd(),
       'src',
-      'persistence',
+      'db',
       'migrations',
       migrationName,
     );

@@ -1,4 +1,7 @@
-import { assertHasBalance, assertPositiveDays } from './balance.policy';
+import {
+  assertHasBalance,
+  assertPositiveDays,
+} from '../../../src/modules/shared/domain/balance.policy';
 
 describe('balance policy', () => {
   it('should reject approval when days <= 0', () => {

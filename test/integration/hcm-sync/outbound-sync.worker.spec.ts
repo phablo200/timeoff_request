@@ -1,11 +1,11 @@
-import { ConfigService } from '../../config.service';
-import { DatabaseService } from '../../persistence/database.service';
-import { BalancesRepository } from '../balances/balances.repository';
-import { MetricsService } from '../observability/metrics.service';
-import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
-import { TimeOffRequestsService } from '../timeoff-requests/timeoff-requests.service';
-import { HcmClient } from './hcm.client';
-import { OutboundSyncWorker } from './outbound-sync.worker';
+import { ConfigService } from '../../../src/config.service';
+import { DatabaseService } from '../../../src/persistence/database.service';
+import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
+import { MetricsService } from '../../../src/modules/observability/metrics.service';
+import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';
+import { TimeOffRequestsService } from '../../../src/modules/timeoff-requests/timeoff-requests.service';
+import { HcmClient } from '../../../src/modules/hcm-sync/hcm.client';
+import { OutboundSyncWorker } from '../../../src/modules/hcm-sync/outbound-sync.worker';
 
 describe('OutboundSyncWorker', () => {
   let databaseService: DatabaseService;

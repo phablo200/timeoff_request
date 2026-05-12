@@ -1,98 +1,120 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ExampleHR Time-Off Microservice
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS + SQLite service for managing time-off request lifecycle while keeping balances synchronized with an HCM source of truth.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## What It Does
 
-## Description
+- Manages time-off requests (`PENDING`, `APPROVED`, `SYNCED`, `REJECTED`, `CANCELLED`, `FAILED_SYNC`, `REVERSED`)
+- Enforces local balance integrity (non-negative balances, guarded transitions)
+- Records balance ledger entries for lifecycle and sync events
+- Processes outbound HCM sync events asynchronously with retry/backoff
+- Ingests realtime HCM updates with dedupe (`externalEventId + payloadHash`)
+- Ingests HCM batch balance snapshots with job/checkpoint/dead-letter persistence
+- Reconciles local balances against HCM absolute values and records drift events
+- Supports API idempotency for write calls via `Idempotency-Key`
+- Exposes Prometheus-style metrics endpoint
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture Notes
 
-## Project setup
+- Persistence: SQLite via `better-sqlite3`
+- Schema/migration bootstrap: `src/persistence/migrations/001_init.sql`
+- Transaction boundary for approval flow: request status + balance update + ledger + sync event
+- HCM behavior can be tested with the persistent mock server in `test/mocks/hcm-mock.server.ts`
 
-```bash
-$ yarn install
-```
+## API Endpoints
 
-## Compile and run the project
+### Time-Off Requests
+- `POST /timeoff-requests`
+- `GET /timeoff-requests/:id`
+- `POST /timeoff-requests/:id/approve`
+- `POST /timeoff-requests/:id/reject`
+- `POST /timeoff-requests/:id/cancel`
 
-```bash
-# development
-$ yarn run start
+### Balances
+- `GET /balances/:employeeId/:locationId`
 
-# watch mode
-$ yarn run start:dev
+### HCM Sync
+- `POST /sync/hcm/realtime/balance-updates`
+- `POST /sync/hcm/batch/balances`
+- `POST /sync/hcm/reconcile/:employeeId/:locationId`
+- `GET /sync/hcm/drift`
+- `POST /sync/hcm/outbound/process?limit=10`
 
-# production mode
-$ yarn run start:prod
-```
+### Observability
+- `GET /metrics`
 
-## Run tests
+## Configuration
 
-```bash
-# unit tests
-$ yarn run test
+Environment variables:
 
-# e2e tests
-$ yarn run test:e2e
+- `DB_PATH` (default: `:memory:`)
+- `SYNC_WORKER_INTERVAL_MS` (default: `5000`)
+- `SYNC_MAX_ATTEMPTS` (default: `5`)
+- `IDEMPOTENCY_TTL_SEC` (default: `86400`)
+- `HCM_BASE_URL` (optional; defaults to internal in-memory HCM client behavior)
 
-# test coverage
-$ yarn run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Example local run with persistent DB:
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+env DB_PATH=./tmp/example-hr.sqlite yarn start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Setup
 
-## Resources
+```bash
+yarn install
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Run
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+# dev
+yarn start:dev
 
-## Support
+# build
+yarn build
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# prod
+yarn start:prod
+```
 
-## Stay in touch
+## Test & Quality
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+# lint
+yarn lint
 
-## License
+# unit/integration-style specs
+yarn test --runInBand
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# e2e
+yarn test:e2e --runInBand
+
+# coverage
+yarn test:cov
+```
+
+Mock HCM utility commands:
+
+```bash
+yarn hcm:mock:start
+yarn hcm:mock:reset
+```
+
+## Current Status
+
+Initial implementation is complete for the core lifecycle + sync flows.
+
+Completed and passing locally in this workspace:
+- `yarn lint`
+- `yarn test --runInBand`
+- `yarn test:cov`
+
+Note: `yarn test:e2e --runInBand` may fail in restricted sandboxes due to socket bind permissions (`EPERM`).
+
+## Documentation
+
+- Product/problem context: `.workspace/challenge.md`
+- TDD plan: `.workspace/implementation-plan.md`
+- Final execution checklist: `.workspace/final-implementation-plan.md`
+- Coverage evidence: `.workspace/coverage-evidence.md`

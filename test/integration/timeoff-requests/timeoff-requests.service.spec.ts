@@ -1,7 +1,7 @@
-import { BalancesRepository } from '../balances/balances.repository';
-import { DatabaseService } from '../../persistence/database.service';
-import { TimeOffRequestsRepository } from './timeoff-requests.repository';
-import { TimeOffRequestsService } from './timeoff-requests.service';
+import { DatabaseService } from '../../../src/persistence/database.service';
+import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
+import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';
+import { TimeOffRequestsService } from '../../../src/modules/timeoff-requests/timeoff-requests.service';
 
 describe('TimeOffRequestsService', () => {
   let service: TimeOffRequestsService;

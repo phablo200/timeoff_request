@@ -1,6 +1,6 @@
-import { ConfigService } from '../../config.service';
-import { DatabaseService } from '../../persistence/database.service';
-import { IdempotencyService } from './idempotency.service';
+import { ConfigService } from '../../src/config.service';
+import { DatabaseService } from '../../src/persistence/database.service';
+import { IdempotencyService } from '../../src/modules/idempotency/idempotency.service';
 
 describe('IdempotencyService', () => {
   it('cleans up expired records', () => {

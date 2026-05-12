@@ -1,4 +1,4 @@
-import { assertTransition } from './request-status.policy';
+import { assertTransition } from '../../../src/modules/shared/domain/request-status.policy';
 
 describe('request status policy', () => {
   it('should allow PENDING -> APPROVED transition', () => {

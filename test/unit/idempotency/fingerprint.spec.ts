@@ -1,4 +1,4 @@
-import { canonicalFingerprint } from './fingerprint';
+import { canonicalFingerprint } from '../../../src/modules/idempotency/fingerprint';
 
 describe('canonicalFingerprint', () => {
   it('returns same fingerprint for equivalent object key order', () => {

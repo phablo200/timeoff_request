@@ -1,6 +1,6 @@
-import { DatabaseService } from '../../persistence/database.service';
-import { BalancesRepository } from '../balances/balances.repository';
-import { RealtimeSyncService } from './realtime-sync.service';
+import { DatabaseService } from '../../../src/persistence/database.service';
+import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
+import { RealtimeSyncService } from '../../../src/modules/hcm-sync/realtime-sync.service';
 
 describe('RealtimeSyncService', () => {
   let service: RealtimeSyncService;

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../../db/database.service';
+import { DomainErrorCode } from '../../filters/domain-error.filter';
 import { BalancesRepository } from '../balances/balances.repository';
 import { MetricsService } from '../observability/metrics.service';
 import { DomainError } from '../../shared/domain/errors';
@@ -34,7 +35,7 @@ export class BatchSyncService {
   ingestBatch(payload: BatchPayload) {
     if (!payload.jobId || !payload.checksum) {
       throw new DomainError(
-        'INVALID_DIMENSIONS',
+        DomainErrorCode.INVALID_DIMENSIONS,
         'jobId and checksum are required',
       );
     }
@@ -187,7 +188,7 @@ export class BatchSyncService {
   async reconcileOne(employeeId: string, locationId: string) {
     if (!employeeId || !locationId) {
       throw new DomainError(
-        'INVALID_DIMENSIONS',
+        DomainErrorCode.INVALID_DIMENSIONS,
         'employeeId and locationId are required',
       );
     }
@@ -195,11 +196,17 @@ export class BatchSyncService {
     const local = this.balancesRepository.get(employeeId, locationId);
     const hcmDays = await this.hcmClient.getBalance(employeeId, locationId);
     if (hcmDays === null) {
-      throw new DomainError('HCM_UNAVAILABLE', 'hcm unavailable');
+      throw new DomainError(
+        DomainErrorCode.HCM_UNAVAILABLE,
+        'hcm unavailable',
+      );
     }
 
     if (hcmDays === undefined) {
-      throw new DomainError('INVALID_DIMENSIONS', 'hcm balance key not found');
+      throw new DomainError(
+        DomainErrorCode.INVALID_DIMENSIONS,
+        'hcm balance key not found',
+      );
     }
 
     const updated = !local || local.availableDays !== hcmDays;

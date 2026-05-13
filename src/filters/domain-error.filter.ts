@@ -7,7 +7,7 @@ import {
 import { Request, Response } from 'express';
 import { DomainError } from '../shared/domain/errors';
 
-enum DomainErrorCode {
+export enum DomainErrorCode {
   REQUEST_NOT_FOUND = 'REQUEST_NOT_FOUND',
   ILLEGAL_STATUS_TRANSITION = 'ILLEGAL_STATUS_TRANSITION',
   INVALID_DAYS = 'INVALID_DAYS',
@@ -15,6 +15,7 @@ enum DomainErrorCode {
   IDEMPOTENCY_KEY_CONFLICT = 'IDEMPOTENCY_KEY_CONFLICT',
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   CONFLICT = 'CONFLICT',
+  HCM_UNAVAILABLE = 'HCM_UNAVAILABLE',
 }
 
 @Catch(DomainError)
@@ -47,6 +48,8 @@ function mapCodeToHttpStatus(code: string): number {
       return HttpStatus.CONFLICT;
     case DomainErrorCode.CONFLICT:
       return HttpStatus.CONFLICT;
+    case DomainErrorCode.HCM_UNAVAILABLE:
+      return HttpStatus.SERVICE_UNAVAILABLE;
     default:
       return HttpStatus.BAD_REQUEST;
   }

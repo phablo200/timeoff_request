@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { DomainErrorCode } from '../../filters/domain-error.filter';
 import { BalancesRepository } from '../balances/balances.repository';
 import { DomainError } from '../../shared/domain/errors';
 import { LedgerEntryType } from '../../shared/types/balance.types';
@@ -18,7 +19,10 @@ export class RealtimeSyncService {
 
   processBalanceUpdate(event: RealtimeBalanceEvent) {
     if (!event.externalEventId || !event.employeeId || !event.locationId) {
-      throw new DomainError('INVALID_DIMENSIONS', 'invalid realtime event');
+      throw new DomainError(
+        DomainErrorCode.INVALID_DIMENSIONS,
+        'invalid realtime event',
+      );
     }
 
     const payloadHash = JSON.stringify(event);

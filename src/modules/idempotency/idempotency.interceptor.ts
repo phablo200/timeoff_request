@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { DomainErrorCode } from '../../filters/domain-error.filter';
 import { DomainError } from '../../shared/domain/errors';
 import { canonicalFingerprint } from './fingerprint';
 import { IdempotencyService } from './idempotency.service';
@@ -45,7 +46,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
     if (existing) {
       if (existing.fingerprint !== fingerprint) {
         throw new DomainError(
-          'IDEMPOTENCY_KEY_CONFLICT',
+          DomainErrorCode.IDEMPOTENCY_KEY_CONFLICT,
           'idempotency key reuse with different payload',
         );
       }

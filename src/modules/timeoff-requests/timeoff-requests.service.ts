@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../db/database.service';
+import { DomainErrorCode } from '../../filters/domain-error.filter';
 import { BalancesRepository } from '../balances/balances.repository';
 import {
   assertHasBalance,
@@ -36,7 +37,7 @@ export class TimeOffRequestsService {
     assertPositiveDays(input.days);
     if (!input.employeeId || !input.locationId) {
       throw new DomainError(
-        'INVALID_DIMENSIONS',
+        DomainErrorCode.INVALID_DIMENSIONS,
         'employeeId and locationId are required',
       );
     }
@@ -59,7 +60,10 @@ export class TimeOffRequestsService {
   findById(id: string): TimeOffRequest {
     const request = this.requestsRepository.findById(id);
     if (!request) {
-      throw new DomainError('REQUEST_NOT_FOUND', `request ${id} not found`);
+      throw new DomainError(
+        DomainErrorCode.REQUEST_NOT_FOUND,
+        `request ${id} not found`,
+      );
     }
     return request;
   }
@@ -138,7 +142,7 @@ export class TimeOffRequestsService {
     }
 
     throw new DomainError(
-      'CONFLICT',
+      DomainErrorCode.CONFLICT,
       'failed to approve after optimistic retries',
     );
   }

@@ -103,6 +103,14 @@ yarn hcm:mock:start
 yarn hcm:mock:reset
 ```
 
+Contract tests:
+
+```bash
+yarn test:contract
+```
+
+Contract details and guardrails are documented in `test/contract/README.md`.
+
 ## Current Status
 
 Initial implementation is complete for the core lifecycle + sync flows.

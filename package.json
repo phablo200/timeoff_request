@@ -16,6 +16,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:contract": "jest --runInBand --testRegex test/contract/.*\\.spec\\.ts$",
+    "test:contract:watch": "jest --watch --testRegex test/contract/.*\\.spec\\.ts$",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "hcm:mock:start": "ts-node test/mocks/hcm-mock.server.ts",

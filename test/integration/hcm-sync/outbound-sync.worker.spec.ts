@@ -1,13 +1,13 @@
 import { ConfigService } from '../../../src/config/config.service';
 import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
-import { AppLogger } from '../../../src/modules/observability/app-logger.service';
-import { AppLoggerRepository } from '../../../src/modules/observability/app-logger.repository';
-import { MetricsService } from '../../../src/modules/observability/metrics.service';
+import { AppLogger } from '../../../src/modules/observability/services/app-logger.service';
+import { AppLoggerRepository } from '../../../src/modules/observability/repository/app-logger.repository';
+import { MetricsService } from '../../../src/modules/observability/services/metrics.service';
 import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';
 import { TimeOffRequestsService } from '../../../src/modules/timeoff-requests/timeoff-requests.service';
-import { HcmClient } from '../../../src/modules/hcm-sync/hcm.client';
-import { OutboundSyncWorker } from '../../../src/modules/hcm-sync/outbound-sync.worker';
+import { HcmClient } from '../../../src/modules/hcm-sync/clients/hcm.client';
+import { OutboundSyncWorker } from '../../../src/modules/hcm-sync/workers/outbound-sync.worker';
 
 describe('OutboundSyncWorker', () => {
   let databaseService: DatabaseService;

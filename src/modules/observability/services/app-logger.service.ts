@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RequestContext } from './request-context';
-import { AppLoggerRepository } from './app-logger.repository';
+import { RequestContext } from '../request-context';
+import { AppLoggerRepository } from '../repository/app-logger.repository';
 
 @Injectable()
 export class AppLogger {

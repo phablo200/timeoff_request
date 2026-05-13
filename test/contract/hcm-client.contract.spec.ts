@@ -1,4 +1,4 @@
-import { HcmClient } from '../../src/modules/hcm-sync/hcm.client';
+import { HcmClient } from '../../src/modules/hcm-sync/clients/hcm.client';
 import {
   resetHcm,
   setFailureMode,

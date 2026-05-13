@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '../../config/config.service';
-import { AppLogger } from '../observability/app-logger.service';
-import { MetricsService } from '../observability/metrics.service';
-import { RequestContext } from '../observability/request-context';
-import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
-import { HcmClient } from './hcm.client';
+import { ConfigService } from '../../../config/config.service';
+import { AppLogger } from '../../observability/services/app-logger.service';
+import { MetricsService } from '../../observability/services/metrics.service';
+import { RequestContext } from '../../observability/request-context';
+import { TimeOffRequestsRepository } from '../../timeoff-requests/timeoff-requests.repository';
+import { HcmClient } from '../clients/hcm.client';
 
 @Injectable()
 export class OutboundSyncWorker {

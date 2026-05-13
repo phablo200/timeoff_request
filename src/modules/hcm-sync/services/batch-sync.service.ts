@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../../db/database.service';
-import { DomainErrorCode } from '../../filters/domain-error.filter';
-import { BalancesRepository } from '../balances/balances.repository';
-import { AppLogger } from '../observability/app-logger.service';
-import { MetricsService } from '../observability/metrics.service';
-import { DomainError } from '../../shared/domain/errors';
-import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
-import { HcmClient } from './hcm.client';
+import { DatabaseService } from '../../../db/database.service';
+import { DomainErrorCode } from '../../../filters/domain-error.filter';
+import { BalancesRepository } from '../../balances/balances.repository';
+import { AppLogger } from '../../observability/services/app-logger.service';
+import { MetricsService } from '../../observability/services/metrics.service';
+import { DomainError } from '../../../shared/domain/errors';
+import { TimeOffRequestsRepository } from '../../timeoff-requests/timeoff-requests.repository';
+import { HcmClient } from '../clients/hcm.client';
 
 interface BatchRow {
   employeeId: string;

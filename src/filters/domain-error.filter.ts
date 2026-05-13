@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AppLogger } from '../modules/observability/app-logger.service';
+import { AppLogger } from '../modules/observability/services/app-logger.service';
 import { RequestContext } from '../modules/observability/request-context';
 import { DomainError } from '../shared/domain/errors';
 

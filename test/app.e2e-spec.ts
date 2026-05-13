@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { HcmClient } from '../src/modules/hcm-sync/hcm.client';
+import { HcmClient } from '../src/modules/hcm-sync/clients/hcm.client';
 
 describe('Timeoff API (e2e)', () => {
   let app: INestApplication;

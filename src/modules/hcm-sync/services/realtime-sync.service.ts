@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { DomainErrorCode } from '../../filters/domain-error.filter';
-import { BalancesRepository } from '../balances/balances.repository';
-import { DomainError } from '../../shared/domain/errors';
-import { LedgerEntryType } from '../../shared/types/balance.types';
+import { DomainErrorCode } from '../../../filters/domain-error.filter';
+import { BalancesRepository } from '../../balances/balances.repository';
+import { DomainError } from '../../../shared/domain/errors';
+import { LedgerEntryType } from '../../../shared/types/balance.types';
 
 export interface RealtimeBalanceEvent {
   externalEventId: string;

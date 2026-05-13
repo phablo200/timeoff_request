@@ -1,5 +1,5 @@
 import { Controller, Post, Query } from '@nestjs/common';
-import { OutboundSyncWorker } from './outbound-sync.worker';
+import { OutboundSyncWorker } from '../workers/outbound-sync.worker';
 
 @Controller('sync/hcm/outbound')
 export class SyncAdminController {

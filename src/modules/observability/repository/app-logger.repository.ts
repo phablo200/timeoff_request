@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../../db/database.service';
+import { DatabaseService } from '../../../db/database.service';
 
 @Injectable()
 export class AppLoggerRepository {

@@ -2,6 +2,10 @@
 
 NestJS + SQLite service for managing time-off request lifecycle while keeping balances synchronized with an HCM source of truth.
 
+## Repository
+
+- GitHub: https://github.com/phablo200/timeoff_request
+
 ## What It Does
 
 - Manages time-off requests (`PENDING`, `APPROVED`, `SYNCED`, `REJECTED`, `CANCELLED`, `FAILED_SYNC`, `REVERSED`)
@@ -124,7 +128,27 @@ Note: `yarn test:e2e --runInBand` may fail in restricted sandboxes due to socket
 
 ## Documentation
 
-- Product/problem context: `.workspace/challenge.md`
-- TDD plan: `.workspace/implementation-plan.md`
-- Final execution checklist: `.workspace/final-implementation-plan.md`
-- Coverage evidence: `.workspace/coverage-evidence.md`
+### Technical Requirements
+- [Context and Goals](docs/trd/00-context-and-goals.md)
+- [Functional & Non-Functional Requirements](docs/trd/01-requirements-functional-nonfunctional.md)
+- [Domain Model and Invariants](docs/trd/02-domain-model-and-invariants.md)
+- [API Contract (REST)](docs/trd/03-api-contract-rest.md)
+- [Sync Strategy: Realtime & Batch](docs/trd/04-sync-strategy-realtime-batch.md)
+- [Error Handling, Idempotency & Retries](docs/trd/05-error-handling-idempotency-retries.md)
+- [Alternatives Considered](docs/trd/06-alternatives-considered.md)
+- [Rollout, Observability & Risks](docs/trd/07-rollout-observability-risks.md)
+
+### Architecture Decision Records
+- [ADR-0001: Source of Truth — HCM](docs/adr/0001-source-of-truth-hcm.md)
+- [ADR-0002: Balance Reservation Strategy](docs/adr/0002-balance-reservation-strategy.md)
+- [ADR-0003: Conflict Resolution Policy](docs/adr/0003-conflict-resolution-policy.md)
+- [Contract Test Plan](docs/adr/contract-test-plan.md)
+
+### Implementation Plans
+- [Service Implementation](docs/plans/service-implementation.md)
+- [Skeleton Plan](docs/plans/skeleton-plan.md)
+- [SQLite Transition Plan](docs/plans/sqlite-transition-plan.md)
+- [Log & Trace Implementation Plan](docs/plans/log-trace-implementation-plan.md)
+
+### API Samples
+- [curl samples](docs/samples.md)

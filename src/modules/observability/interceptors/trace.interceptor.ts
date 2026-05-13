@@ -7,7 +7,7 @@ import {
 import { randomUUID } from 'crypto';
 import { Observable } from 'rxjs';
 import { Request, Response } from 'express';
-import { RequestContext } from './request-context';
+import { RequestContext } from '../request-context';
 
 @Injectable()
 export class TraceInterceptor implements NestInterceptor {

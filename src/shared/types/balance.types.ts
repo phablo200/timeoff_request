@@ -1,8 +1,9 @@
-export type LedgerEntryType =
-  | 'RESERVATION'
-  | 'REVERSAL'
-  | 'HCM_REALTIME_ABSOLUTE'
-  | 'HCM_REALTIME_DELTA';
+export enum LedgerEntryType {
+  RESERVATION = 'RESERVATION',
+  REVERSAL = 'REVERSAL',
+  HCM_REALTIME_ABSOLUTE = 'HCM_REALTIME_ABSOLUTE',
+  HCM_REALTIME_DELTA = 'HCM_REALTIME_DELTA',
+}
 
 export interface Balance {
   employeeId: string;

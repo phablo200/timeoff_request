@@ -1,11 +1,12 @@
-export type RequestStatus =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'SYNCED'
-  | 'REJECTED'
-  | 'CANCELLED'
-  | 'FAILED_SYNC'
-  | 'REVERSED';
+export enum RequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  SYNCED = 'SYNCED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
+  FAILED_SYNC = 'FAILED_SYNC',
+  REVERSED = 'REVERSED',
+}
 
 export interface TimeOffRequest {
   id: string;

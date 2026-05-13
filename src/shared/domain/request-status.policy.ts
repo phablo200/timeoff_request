@@ -2,13 +2,21 @@ import { DomainError } from './errors';
 import { RequestStatus } from '../types/request.types';
 
 const allowedTransitions: Record<RequestStatus, RequestStatus[]> = {
-  PENDING: ['APPROVED', 'REJECTED', 'CANCELLED'],
-  APPROVED: ['SYNCED', 'FAILED_SYNC', 'REVERSED'],
-  SYNCED: [],
-  REJECTED: [],
-  CANCELLED: [],
-  FAILED_SYNC: ['REVERSED'],
-  REVERSED: [],
+  [RequestStatus.PENDING]: [
+    RequestStatus.APPROVED,
+    RequestStatus.REJECTED,
+    RequestStatus.CANCELLED,
+  ],
+  [RequestStatus.APPROVED]: [
+    RequestStatus.SYNCED,
+    RequestStatus.FAILED_SYNC,
+    RequestStatus.REVERSED,
+  ],
+  [RequestStatus.SYNCED]: [],
+  [RequestStatus.REJECTED]: [],
+  [RequestStatus.CANCELLED]: [],
+  [RequestStatus.FAILED_SYNC]: [RequestStatus.REVERSED],
+  [RequestStatus.REVERSED]: [],
 };
 
 export function assertTransition(

@@ -149,10 +149,10 @@ export class TimeOffRequestsRepository {
       )
       .all(requestId) as Array<{
       id: string;
-      direction: 'INBOUND' | 'OUTBOUND';
+      direction: SyncEvent['direction'];
       external_event_id: string;
       payload_hash: string;
-      status: 'PROCESSED' | 'FAILED' | 'QUEUED';
+      status: SyncEvent['status'];
       error: string | null;
       created_at: string;
     }>;
@@ -183,10 +183,10 @@ export class TimeOffRequestsRepository {
       )
       .all(now, limit) as Array<{
       id: string;
-      direction: 'INBOUND' | 'OUTBOUND';
+      direction: SyncEvent['direction'];
       external_event_id: string;
       payload_hash: string;
-      status: 'PROCESSED' | 'FAILED' | 'QUEUED';
+      status: SyncEvent['status'];
       error: string | null;
       request_id: string | null;
       attempt_count: number;

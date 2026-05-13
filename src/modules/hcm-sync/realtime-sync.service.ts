@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { BalancesRepository } from '../balances/balances.repository';
 import { DomainError } from '../../shared/domain/errors';
+import { LedgerEntryType } from '../../shared/types/balance.types';
 
 export interface RealtimeBalanceEvent {
   externalEventId: string;
@@ -54,8 +55,8 @@ export class RealtimeSyncService {
       balanceKey: `${event.employeeId}::${event.locationId}`,
       type:
         event.updateType === 'ABSOLUTE'
-          ? 'HCM_REALTIME_ABSOLUTE'
-          : 'HCM_REALTIME_DELTA',
+          ? LedgerEntryType.HCM_REALTIME_ABSOLUTE
+          : LedgerEntryType.HCM_REALTIME_DELTA,
       days: event.days,
       source: 'HCM_REALTIME',
       createdAt: new Date().toISOString(),

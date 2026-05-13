@@ -8,8 +8,13 @@ import {
 } from '../../shared/domain/balance.policy';
 import { DomainError } from '../../shared/domain/errors';
 import { assertTransition } from '../../shared/domain/request-status.policy';
-import { TimeOffRequest } from '../../shared/types/request.types';
-import { SyncEvent } from '../../shared/types/sync.types';
+import { LedgerEntryType } from '../../shared/types/balance.types';
+import { RequestStatus, TimeOffRequest } from '../../shared/types/request.types';
+import {
+  SyncDirection,
+  SyncEvent,
+  SyncStatus,
+} from '../../shared/types/sync.types';
 import { TimeOffRequestsRepository } from './timeoff-requests.repository';
 
 interface CreateRequestInput {
@@ -43,7 +48,7 @@ export class TimeOffRequestsService {
       locationId: input.locationId,
       days: input.days,
       reason: input.reason,
-      status: 'PENDING',
+      status: RequestStatus.PENDING,
       createdAt: now,
       updatedAt: now,
     };
@@ -67,7 +72,7 @@ export class TimeOffRequestsService {
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const approved = this.databaseService.withTransaction(() => {
         const request = this.findById(id);
-        assertTransition(request.status, 'APPROVED');
+        assertTransition(request.status, RequestStatus.APPROVED);
 
         const currentBalance =
           this.balancesRepository.get(request.employeeId, request.locationId) ??
@@ -92,7 +97,7 @@ export class TimeOffRequestsService {
 
         const updatedRequest: TimeOffRequest = {
           ...request,
-          status: 'APPROVED',
+          status: RequestStatus.APPROVED,
           updatedAt: new Date().toISOString(),
         };
         this.requestsRepository.save(updatedRequest);
@@ -100,7 +105,7 @@ export class TimeOffRequestsService {
         this.balancesRepository.insertLedgerEntry({
           id: randomUUID(),
           balanceKey: `${updatedRequest.employeeId}::${updatedRequest.locationId}`,
-          type: 'RESERVATION',
+          type: LedgerEntryType.RESERVATION,
           days: updatedRequest.days,
           requestId: updatedRequest.id,
           source: 'LOCAL_APPROVAL',
@@ -109,14 +114,14 @@ export class TimeOffRequestsService {
 
         const syncEvent: SyncEvent = {
           id: randomUUID(),
-          direction: 'OUTBOUND',
+          direction: SyncDirection.OUTBOUND,
           externalEventId: `approve:${updatedRequest.id}`,
           payloadHash: JSON.stringify({
             employeeId: updatedRequest.employeeId,
             locationId: updatedRequest.locationId,
             days: updatedRequest.days,
           }),
-          status: 'QUEUED',
+          status: SyncStatus.QUEUED,
           createdAt: new Date().toISOString(),
         };
 
@@ -140,10 +145,10 @@ export class TimeOffRequestsService {
 
   reject(id: string): TimeOffRequest {
     const request = this.findById(id);
-    assertTransition(request.status, 'REJECTED');
+    assertTransition(request.status, RequestStatus.REJECTED);
     const updated = {
       ...request,
-      status: 'REJECTED' as const,
+      status: RequestStatus.REJECTED,
       updatedAt: new Date().toISOString(),
     };
     return this.requestsRepository.save(updated);
@@ -151,10 +156,10 @@ export class TimeOffRequestsService {
 
   cancel(id: string): TimeOffRequest {
     const request = this.findById(id);
-    assertTransition(request.status, 'CANCELLED');
+    assertTransition(request.status, RequestStatus.CANCELLED);
     const updated = {
       ...request,
-      status: 'CANCELLED' as const,
+      status: RequestStatus.CANCELLED,
       updatedAt: new Date().toISOString(),
     };
     return this.requestsRepository.save(updated);

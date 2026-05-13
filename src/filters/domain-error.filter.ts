@@ -5,6 +5,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AppLogger } from '../modules/observability/app-logger.service';
+import { RequestContext } from '../modules/observability/request-context';
 import { DomainError } from '../shared/domain/errors';
 
 export enum DomainErrorCode {
@@ -20,17 +22,37 @@ export enum DomainErrorCode {
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
+  constructor(private readonly appLogger: AppLogger) {}
+
   catch(exception: DomainError, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    const trace = RequestContext.get();
+    const correlationId =
+      trace?.correlationId ??
+      (typeof request.headers['x-correlation-id'] === 'string'
+        ? request.headers['x-correlation-id']
+        : null);
+    const requestId = trace?.requestId ?? null;
+
+    this.appLogger.error(DomainErrorFilter.name, {
+      msg: 'domain_error',
+      code: exception.code,
+      message: exception.message,
+      details: exception.details ?? null,
+      path: request.path,
+      method: request.method,
+    });
 
     const status = mapCodeToHttpStatus(exception.code);
     response.status(status).json({
       code: exception.code,
       message: exception.message,
       details: exception.details,
-      correlationId: request.headers['x-correlation-id'] ?? null,
+      correlationId,
+      requestId,
     });
   }
 }

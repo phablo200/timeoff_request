@@ -16,6 +16,7 @@ import {
   SyncEvent,
   SyncStatus,
 } from '../../shared/types/sync.types';
+import { RequestContext } from '../observability/request-context';
 import { TimeOffRequestsRepository } from './timeoff-requests.repository';
 
 interface CreateRequestInput {
@@ -104,6 +105,7 @@ export class TimeOffRequestsService {
           status: RequestStatus.APPROVED,
           updatedAt: new Date().toISOString(),
         };
+        const trace = RequestContext.get();
         this.requestsRepository.save(updatedRequest);
 
         this.balancesRepository.insertLedgerEntry({
@@ -124,6 +126,12 @@ export class TimeOffRequestsService {
             employeeId: updatedRequest.employeeId,
             locationId: updatedRequest.locationId,
             days: updatedRequest.days,
+            trace: trace
+              ? {
+                  correlationId: trace.correlationId,
+                  requestId: trace.requestId,
+                }
+              : undefined,
           }),
           status: SyncStatus.QUEUED,
           createdAt: new Date().toISOString(),

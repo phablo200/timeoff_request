@@ -1,5 +1,6 @@
 import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
+import { AppLogger } from '../../../src/modules/observability/app-logger.service';
 import { MetricsService } from '../../../src/modules/observability/metrics.service';
 import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';
 import { BatchSyncService } from '../../../src/modules/hcm-sync/batch-sync.service';
@@ -21,6 +22,7 @@ describe('BatchSyncService', () => {
       hcmClient,
       new TimeOffRequestsRepository(db),
       new MetricsService(),
+      new AppLogger(),
     );
   });
 

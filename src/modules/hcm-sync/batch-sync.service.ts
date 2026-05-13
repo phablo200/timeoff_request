@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../db/database.service';
 import { DomainErrorCode } from '../../filters/domain-error.filter';
 import { BalancesRepository } from '../balances/balances.repository';
+import { AppLogger } from '../observability/app-logger.service';
 import { MetricsService } from '../observability/metrics.service';
 import { DomainError } from '../../shared/domain/errors';
 import { TimeOffRequestsRepository } from '../timeoff-requests/timeoff-requests.repository';
@@ -22,14 +23,13 @@ interface BatchPayload {
 
 @Injectable()
 export class BatchSyncService {
-  private readonly logger = new Logger(BatchSyncService.name);
-
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly balancesRepository: BalancesRepository,
     private readonly hcmClient: HcmClient,
     private readonly requestsRepository: TimeOffRequestsRepository,
     private readonly metricsService: MetricsService,
+    private readonly appLogger: AppLogger,
   ) {}
 
   ingestBatch(payload: BatchPayload) {
@@ -238,16 +238,14 @@ export class BatchSyncService {
 
       this.metricsService.inc('reconciliation_drift_total');
 
-      this.logger.log(
-        JSON.stringify({
-          msg: 'reconciliation_drift_detected',
-          employeeId,
-          locationId,
-          localDays,
-          hcmDays,
-          reconciliation_drift_total: 1,
-        }),
-      );
+      this.appLogger.log(BatchSyncService.name, {
+        msg: 'reconciliation_drift_detected',
+        employeeId,
+        locationId,
+        localDays,
+        hcmDays,
+        reconciliationDriftTotal: 1,
+      });
     }
 
     return {

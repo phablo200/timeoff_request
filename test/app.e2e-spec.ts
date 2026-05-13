@@ -54,6 +54,30 @@ describe('Timeoff API (e2e)', () => {
     expect(balanceBody.availableDays).toBe(8);
   });
 
+  it('returns generated trace headers when request has no correlation id', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .send({ employeeId: 'trace-emp', locationId: 'trace-loc', days: 1 })
+      .expect(201);
+
+    expect(response.headers['x-correlation-id']).toBeDefined();
+    expect(response.headers['x-request-id']).toBeDefined();
+  });
+
+  it('preserves inbound x-correlation-id and includes trace ids in error body', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/timeoff-requests')
+      .set('x-correlation-id', 'corr-test-1')
+      .send({ employeeId: 'trace-emp', locationId: 'trace-loc', days: 0 })
+      .expect(400);
+
+    expect(response.headers['x-correlation-id']).toBe('corr-test-1');
+    expect((response.body as { correlationId: string }).correlationId).toBe(
+      'corr-test-1',
+    );
+    expect((response.body as { requestId?: string }).requestId).toBeDefined();
+  });
+
   it('replays same Idempotency-Key with identical response and rejects payload mismatch', async () => {
     const idemKey = 'idem-1';
 

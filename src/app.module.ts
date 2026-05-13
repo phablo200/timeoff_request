@@ -12,6 +12,8 @@ import { SyncAdminController } from './modules/hcm-sync/sync-admin.controller';
 import { OutboundSyncWorker } from './modules/hcm-sync/outbound-sync.worker';
 import { MetricsController } from './modules/observability/metrics.controller';
 import { MetricsService } from './modules/observability/metrics.service';
+import { TraceInterceptor } from './modules/observability/trace.interceptor';
+import { AppLogger } from './modules/observability/app-logger.service';
 import { IdempotencyInterceptor } from './modules/idempotency/idempotency.interceptor';
 import { IdempotencyService } from './modules/idempotency/idempotency.service';
 import { ConfigService } from './config/config.service';
@@ -43,10 +45,15 @@ import { DomainErrorFilter } from './filters/domain-error.filter';
     OutboundSyncWorker,
     HcmClient,
     MetricsService,
+    AppLogger,
     IdempotencyService,
     {
       provide: APP_FILTER,
       useClass: DomainErrorFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TraceInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

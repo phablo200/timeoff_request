@@ -14,6 +14,7 @@ import { MetricsController } from './modules/observability/metrics.controller';
 import { MetricsService } from './modules/observability/metrics.service';
 import { TraceInterceptor } from './modules/observability/trace.interceptor';
 import { AppLogger } from './modules/observability/app-logger.service';
+import { AppLoggerRepository } from './modules/observability/app-logger.repository';
 import { IdempotencyInterceptor } from './modules/idempotency/idempotency.interceptor';
 import { IdempotencyService } from './modules/idempotency/idempotency.service';
 import { ConfigService } from './config/config.service';
@@ -45,6 +46,7 @@ import { DomainErrorFilter } from './filters/domain-error.filter';
     OutboundSyncWorker,
     HcmClient,
     MetricsService,
+    AppLoggerRepository,
     AppLogger,
     IdempotencyService,
     {

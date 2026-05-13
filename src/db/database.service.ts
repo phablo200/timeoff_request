@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import Database from 'better-sqlite3';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { ConfigService } from '../config/config.service';
 
@@ -28,6 +28,7 @@ export class DatabaseService {
 
   resetAllTables(): void {
     this.db.exec(`
+      DELETE FROM log;
       DELETE FROM balance_ledger;
       DELETE FROM sync_events;
       DELETE FROM idempotency_records;
@@ -41,7 +42,6 @@ export class DatabaseService {
   }
 
   private runMigrations(): void {
-    const migrationName = '001_init.sql';
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,27 +49,28 @@ export class DatabaseService {
         applied_at TEXT NOT NULL
       );
     `);
-    const alreadyApplied = this.db
-      .prepare(`SELECT 1 FROM schema_migrations WHERE name = ?`)
-      .get(migrationName);
+    const compiledDir = join(__dirname, 'migrations');
+    const sourceDir = join(process.cwd(), 'src', 'db', 'migrations');
+    const migrationsDir = existsSync(compiledDir) ? compiledDir : sourceDir;
+    const migrationNames = readdirSync(migrationsDir)
+      .filter((fileName) => fileName.endsWith('.sql'))
+      .sort();
 
-    if (alreadyApplied) {
-      return;
+    for (const migrationName of migrationNames) {
+      const alreadyApplied = this.db
+        .prepare(`SELECT 1 FROM schema_migrations WHERE name = ?`)
+        .get(migrationName);
+
+      if (alreadyApplied) {
+        continue;
+      }
+
+      const migrationPath = join(migrationsDir, migrationName);
+      const migrationSql = readFileSync(migrationPath, 'utf8');
+      this.db.exec(migrationSql);
+      this.db
+        .prepare(`INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)`)
+        .run(migrationName, new Date().toISOString());
     }
-
-    const compiledPath = join(__dirname, 'migrations', migrationName);
-    const sourcePath = join(
-      process.cwd(),
-      'src',
-      'db',
-      'migrations',
-      migrationName,
-    );
-    const migrationPath = existsSync(compiledPath) ? compiledPath : sourcePath;
-    const migrationSql = readFileSync(migrationPath, 'utf8');
-    this.db.exec(migrationSql);
-    this.db
-      .prepare(`INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)`)
-      .run(migrationName, new Date().toISOString());
   }
 }

@@ -2,6 +2,7 @@ import { ConfigService } from '../../../src/config/config.service';
 import { DatabaseService } from '../../../src/db/database.service';
 import { BalancesRepository } from '../../../src/modules/balances/balances.repository';
 import { AppLogger } from '../../../src/modules/observability/app-logger.service';
+import { AppLoggerRepository } from '../../../src/modules/observability/app-logger.repository';
 import { MetricsService } from '../../../src/modules/observability/metrics.service';
 import { TimeOffRequestsRepository } from '../../../src/modules/timeoff-requests/timeoff-requests.repository';
 import { TimeOffRequestsService } from '../../../src/modules/timeoff-requests/timeoff-requests.service';
@@ -33,7 +34,7 @@ describe('OutboundSyncWorker', () => {
       hcmClient,
       config,
       new MetricsService(),
-      new AppLogger(),
+      new AppLogger(new AppLoggerRepository(databaseService)),
     );
   });
 

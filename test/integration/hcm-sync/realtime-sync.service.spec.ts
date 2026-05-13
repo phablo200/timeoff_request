@@ -21,7 +21,8 @@ describe('RealtimeSyncService', () => {
     });
 
     expect(result.deduped).toBe(false);
-    expect(result.balance.availableDays).toBe(15);
+    expect(result.balance).toBeDefined();
+    expect(result.balance?.availableDays).toBe(15);
   });
 
   it('should dedupe duplicate realtime event by externalEventId+payloadHash', () => {

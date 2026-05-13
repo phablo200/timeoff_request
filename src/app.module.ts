@@ -19,7 +19,7 @@ import { DatabaseService } from './db/database.service';
 import { TimeOffRequestsController } from './modules/timeoff-requests/timeoff-requests.controller';
 import { TimeOffRequestsRepository } from './modules/timeoff-requests/timeoff-requests.repository';
 import { TimeOffRequestsService } from './modules/timeoff-requests/timeoff-requests.service';
-import { DomainErrorFilter } from './domain-error.filter';
+import { DomainErrorFilter } from './filters/domain-error.filter';
 
 @Module({
   imports: [],
